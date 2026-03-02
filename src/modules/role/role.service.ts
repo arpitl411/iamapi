@@ -37,11 +37,8 @@ export class RoleService {
         `Role with name '${roleData.name}' already exists`,
       );
     }
-
-    // Create role
     const role = this.roleRepository.create(roleData);
 
-    // If permission IDs are provided, fetch and assign permissions
     if (permission_ids && permission_ids.length > 0) {
       const permissions = await this.permissionRepository.find({
         where: { id: In(permission_ids) },
@@ -56,12 +53,9 @@ export class RoleService {
 
     const savedRole = await this.roleRepository.save(role);
 
-    // Handle user assignment if email is provided
     if (user_email) {
       await this.handleUserRoleAssignment(user_email, savedRole);
     }
-
-    // Return role with permissions
     const roleWithPermissions = await this.roleRepository.findOne({
       where: { id: savedRole.id },
       relations: ['permissions'],
@@ -92,13 +86,9 @@ export class RoleService {
         await this.userRepository.save(user);
       }
     } else {
-      // User doesn't exist, create new user with default org-admin role
-      // Get or find the org-admin default role
       const defaultRole = await this.roleRepository.findOne({
         where: { name: 'org-admin' },
       });
-
-      // Create new user with default values
       const newUser = this.userRepository.create({
         email: userEmail,
         first_name: 'New',
@@ -109,7 +99,6 @@ export class RoleService {
         profilePic: '',
         profilePic2: '',
         profilePic3: '',
-        uuid: this.generateUUID(),
         timezone: new Date(),
         roles: defaultRole ? [defaultRole, role] : [role],
       });
@@ -119,13 +108,6 @@ export class RoleService {
     }
   }
 
-  private generateUUID(): string {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = (Math.random() * 16) | 0;
-      const v = c === 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
-  }
 
   async getAllRoles(): Promise<Role[]> {
     return this.roleRepository.find({

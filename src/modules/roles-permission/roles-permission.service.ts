@@ -1,17 +1,26 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleHasPermission } from 'db-schema/role-has-permission.entity';
 import { Role } from 'db-schema/role.entity';
 import { UserPersona } from 'db-schema/user-persons.entity';
 import { User } from 'db-schema/user.entity';
-import { AssignPermissionsToRoleDto, CreateUserDto, CreateUserPersonaDto } from './dtos/create-user.dto';
+import {
+  AssignPermissionsToRoleDto,
+  CreateUserDto,
+  CreateUserPersonaDto,
+} from './dtos/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSource, In, Repository } from 'typeorm';
+import { Permission } from 'db-schema/permission.entity';
 
 @Injectable()
 export class RolesPermissionService {
-    constructor(
+  constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
 
@@ -44,9 +53,8 @@ export class RolesPermissionService {
       const user = manager.create(User, {
         email: dto.email,
         password: hashedPassword,
-        firstName: dto.firstName,
-        lastName: dto.lastName,
-        userName: dto.userName,
+        first_name: dto.first_name ?? null,
+        last_name: dto.last_name ?? null,
         timezone: dto.timezone,
         phoneCountryCode: dto.phoneCountryCode,
         phoneNo: dto.phoneNo,
@@ -58,44 +66,47 @@ export class RolesPermissionService {
 
       const savedUser = await manager.save(User, user);
 
+      // ✅ Create persona
       const userPersona = manager.create(UserPersona, {
         userId: savedUser.id,
         roleId: role.id,
-        personaId: 3,       // business default
-        isDefault: true,    // business default
+        personaId: 3,
+        isDefault: true,
       });
 
       const savedPersona = await manager.save(UserPersona, userPersona);
-
-      let savedPermissions: RoleHasPermission[] = [];
-
-      if (dto.permissionIds && dto.permissionIds.length > 0) {
-        const existing = await manager.find(RoleHasPermission, {
-          where: {
+      const existingMappings = await manager.find(RoleHasPermission, {
+        where: {
+          roleId: role.id,
+        },
+      });
+      const uniqueIds = [...new Set(dto.permissionIds)];
+      const existingSet = new Set(existingMappings.map((e) => e.permissionId));
+      const newMappings = uniqueIds
+        .filter((id) => !existingSet.has(id))
+        .map((id) =>
+          manager.create(RoleHasPermission, {
             roleId: role.id,
-            permissionId: In(dto.permissionIds),
-          },
-        });
-
-        const existingIds = new Set(existing.map((e) => e.permissionId));
-        const newIds = dto.permissionIds.filter((id) => !existingIds.has(id));
-
-        if (newIds.length > 0) {
-          const perms = newIds.map((pid) =>
-            manager.create(RoleHasPermission, {
-              roleId: role.id,
-              permissionId: pid,
-            }),
-          );
-          savedPermissions = await manager.save(RoleHasPermission, perms);
-        }
+            permissionId: id,
+          }),
+        );
+      if (newMappings.length) {
+        await manager.save(RoleHasPermission, newMappings);
       }
+
+      // Always fetch only requested permissions
+      const assignedPermissions = await manager.find(RoleHasPermission, {
+        where: {
+          roleId: role.id,
+          permissionId: In(uniqueIds),
+        },
+      });
 
       return {
         user: this.sanitizeUser(savedUser),
         userPersona: savedPersona,
         role,
-        assignedPermissions: savedPermissions,
+        assignedPermissions: assignedPermissions,
       };
     });
   }
@@ -115,38 +126,22 @@ export class RolesPermissionService {
 
     return this.userPersonaRepo.save(persona);
   }
-
-
-  async assignPermissionsToRole(dto: AssignPermissionsToRoleDto) {
-    const role = await this.roleRepo.findOne({ where: { id: dto.roleId } });
-    if (!role) throw new NotFoundException(`Role ${dto.roleId} not found`);
-
-    const existing = await this.rolePermRepo.find({
-      where: { roleId: dto.roleId, permissionId: In(dto.permissionIds) },
-    });
-
-    const existingIds = new Set(existing.map((e) => e.permissionId));
-    const newIds = dto.permissionIds.filter((id) => !existingIds.has(id));
-
-    if (newIds.length === 0) {
-      return { message: 'All permissions already assigned', role };
-    }
-
-    const perms = newIds.map((pid) =>
-      this.rolePermRepo.create({ roleId: dto.roleId, permissionId: pid }),
-    );
-
-    const saved = await this.rolePermRepo.save(perms);
-    return { role, assignedPermissions: saved };
-  }
-
   async findUserWithPersonasAndPermissions(userId: number) {
     const user = await this.userRepo.findOne({
       where: { id: userId },
-      relations: ['userPersonas', 'userPersonas.role', 'userPersonas.role.roleHasPermissions'],
+      relations: {
+        userPersonas: {
+          role: {
+            permissions: true,
+          },
+        },
+      },
     });
 
-    if (!user) throw new NotFoundException(`User ${userId} not found`);
+    if (!user) {
+      throw new NotFoundException(`User ${userId} not found`);
+    }
+
     return this.sanitizeUser(user);
   }
 

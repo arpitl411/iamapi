@@ -20,19 +20,14 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
-  firstName?: string;
+  first_name: string;
 
   @IsOptional()
   @IsString()
-  lastName?: string;
+  last_name: string;
 
-  @IsOptional()
   @IsString()
-  userName?: string;
-
-  @IsOptional()
-  @IsString()
-  timezone?: string;
+  timezone?: string
 
   @IsOptional()
   @IsString()
@@ -47,10 +42,6 @@ export class CreateUserDto {
   @IsNumber()
   roleId: number;
 
-  /**
-   * Permission IDs to attach to the role via role_has_permissions.
-   * These are merged with any existing permissions for the role.
-   */
   @IsOptional()
   @IsArray()
   @IsNumber({}, { each: true })
@@ -67,12 +58,10 @@ export class CreateUserPersonaDto {
   @IsNumber()
   roleId: number;
 
-  /** Defaults to 1 as per business rule */
   @IsOptional()
   @IsNumber()
   personaId?: number;
 
-  /** Defaults to true as per business rule */
   @IsOptional()
   @IsBoolean()
   isDefault?: boolean;

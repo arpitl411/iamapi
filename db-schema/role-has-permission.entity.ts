@@ -9,18 +9,22 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 import { Role } from './role.entity';
+import { Permission } from './permission.entity';
 
 @Entity('role_has_permissions', { schema: 'public' })
+@Entity('role_has_permissions', { schema: 'public' })
 export class RoleHasPermission {
-  @PrimaryColumn({ name: 'permission_id' })
-  permissionId: number;;
-
-  @Column({ name: 'role_id' })
+  @PrimaryColumn({ name: 'role_id' })
   roleId: number;
 
-  @ManyToOne(() => Role, (role) => role.permissions, {
-    onDelete: 'CASCADE',
-  })
+  @PrimaryColumn({ name: 'permission_id' })
+  permissionId: number;
+
+  @ManyToOne(() => Role, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'role_id' })
   role: Role;
+
+  @ManyToOne(() => Permission, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'permission_id' })
+  permission: Permission;
 }
