@@ -7,6 +7,7 @@ import { CustomConfigModule } from 'utils/db-config/custom-config.module';
 import { CustomConfigService } from 'utils/db-config/custom-config.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { RolesPermissionModule } from './modules/roles-permission/roles-permission.module';
+import { UserTagModule } from './modules/user-tag/user-tag.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { RolesPermissionModule } from './modules/roles-permission/roles-permissi
     RoleModule,
     PermissionModule,
     RolesPermissionModule,
+    UserTagModule,
     TypeOrmModule.forRootAsync({
       inject: [CustomConfigService],
       useFactory: async (configService: CustomConfigService) =>
