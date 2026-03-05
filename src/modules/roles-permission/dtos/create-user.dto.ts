@@ -20,14 +20,14 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
-  first_name: string;
+  first_name!: string;
 
   @IsOptional()
   @IsString()
-  last_name: string;
+  last_name!: string;
 
   @IsString()
-  timezone?: string
+  timezone?: string;
 
   @IsOptional()
   @IsString()
