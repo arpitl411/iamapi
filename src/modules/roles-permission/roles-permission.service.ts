@@ -80,8 +80,6 @@ export class RolesPermissionService {
       });
 
       const savedUser = await manager.save(User, user);
-
-      // ✅ Create persona
       const userPersona = manager.create(UserPersona, {
         userId: savedUser.id,
         roleId: role.id,
@@ -110,7 +108,6 @@ export class RolesPermissionService {
         await manager.save(RoleHasPermission, newMappings);
       }
 
-      // Always fetch only requested permissions
       const assignedPermissions = await manager.find(RoleHasPermission, {
         where: {
           roleId: role.id,
