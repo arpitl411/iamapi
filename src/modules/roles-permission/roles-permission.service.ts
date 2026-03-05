@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,13 +14,19 @@ import {
   CreateUserDto,
   CreateUserPersonaDto,
 } from './dtos/create-user.dto';
-import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSource, In, Repository } from 'typeorm';
-import { Permission } from 'db-schema/permission.entity';
+import { hashPassword } from 'src/common/helpers/hash.helper';
+import { serialize } from 'src/common/helpers/serialize.helper';
+import { ServiceResponse } from 'src/common/interfaces/api-response.interface';
+import { UserResponseDto } from 'src/modules/auth/dtos/user-response.dto';
+import { UserPersonaResponseDto } from './dtos/user-persona-response.dto';
+import { RoleResponseDto } from 'src/modules/role/dtos/role-response.dto';
 
 @Injectable()
 export class RolesPermissionService {
+  private readonly logger = new Logger(RolesPermissionService.name);
+
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
@@ -36,7 +43,14 @@ export class RolesPermissionService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async createUser(dto: CreateUserDto) {
+  async createUser(dto: CreateUserDto): Promise<
+    ServiceResponse<{
+      user: UserResponseDto;
+      userPersona: UserPersonaResponseDto;
+      role: RoleResponseDto;
+      assignedPermissions: RoleHasPermission[];
+    }>
+  > {
     const existing = await this.userRepo.findOne({
       where: { email: dto.email },
     });
@@ -49,7 +63,7 @@ export class RolesPermissionService {
       throw new NotFoundException(`Role with id ${dto.roleId} not found`);
     }
     return this.dataSource.transaction(async (manager) => {
-      const hashedPassword = await bcrypt.hash(dto.password, 10);
+      const hashedPassword = await hashPassword(dto.password);
 
       const user = manager.create(User, {
         email: dto.email,
@@ -76,6 +90,7 @@ export class RolesPermissionService {
       });
 
       const savedPersona = await manager.save(UserPersona, userPersona);
+
       const existingMappings = await manager.find(RoleHasPermission, {
         where: {
           roleId: role.id,
@@ -103,16 +118,23 @@ export class RolesPermissionService {
         },
       });
 
+      this.logger.log(`User created via roles-permission: ${savedUser.email}`);
+
       return {
-        user: this.sanitizeUser(savedUser),
-        userPersona: savedPersona,
-        role,
-        assignedPermissions: assignedPermissions,
+        message: 'User created successfully',
+        data: {
+          user: serialize(UserResponseDto, savedUser),
+          userPersona: serialize(UserPersonaResponseDto, savedPersona),
+          role: serialize(RoleResponseDto, role),
+          assignedPermissions,
+        },
       };
     });
   }
 
-  async createUserPersona(dto: CreateUserPersonaDto) {
+  async createUserPersona(
+    dto: CreateUserPersonaDto,
+  ): Promise<ServiceResponse<UserPersonaResponseDto>> {
     const user = await this.userRepo.findOne({ where: { id: dto.userId } });
     if (!user) throw new NotFoundException(`User ${dto.userId} not found`);
 
@@ -126,10 +148,22 @@ export class RolesPermissionService {
       isDefault: dto.isDefault ?? true,
     });
 
-    return this.userPersonaRepo.save(persona);
+    const saved = await this.userPersonaRepo.save(persona);
+    this.logger.log(
+      `UserPersona created: userId=${dto.userId}, roleId=${dto.roleId}`,
+    );
+
+    return {
+      message: 'User persona created successfully',
+      data: serialize(UserPersonaResponseDto, saved),
+    };
   }
 
-  async assignPermissionsToRole(dto: AssignPermissionsToRoleDto) {
+  async assignPermissionsToRole(
+    dto: AssignPermissionsToRoleDto,
+  ): Promise<
+    ServiceResponse<{ role: RoleResponseDto; assignedCount: number }>
+  > {
     const role = await this.roleRepo.findOne({ where: { id: dto.roleId } });
     if (!role) throw new NotFoundException(`Role ${dto.roleId} not found`);
 
@@ -141,18 +175,33 @@ export class RolesPermissionService {
     const newIds = dto.permissionIds.filter((id) => !existingIds.has(id));
 
     if (newIds.length === 0) {
-      return { message: 'All permissions already assigned', role };
+      return {
+        message: 'All permissions already assigned',
+        data: { role: serialize(RoleResponseDto, role), assignedCount: 0 },
+      };
     }
 
     const perms = newIds.map((pid) =>
       this.rolePermRepo.create({ roleId: dto.roleId, permissionId: pid }),
     );
 
-    const saved = await this.rolePermRepo.save(perms);
-    return { role, assignedPermissions: saved };
+    await this.rolePermRepo.save(perms);
+    this.logger.log(
+      `Assigned ${newIds.length} permissions to roleId=${dto.roleId}`,
+    );
+
+    return {
+      message: 'Permissions assigned successfully',
+      data: {
+        role: serialize(RoleResponseDto, role),
+        assignedCount: newIds.length,
+      },
+    };
   }
 
-  async findUserWithPersonasAndPermissions(userId: number) {
+  async findUserWithPersonasAndPermissions(
+    userId: number,
+  ): Promise<ServiceResponse<UserResponseDto>> {
     const user = await this.userRepo.findOne({
       where: { id: userId },
       relations: [
@@ -166,18 +215,23 @@ export class RolesPermissionService {
       throw new NotFoundException(`User ${userId} not found`);
     }
 
-    return this.sanitizeUser(user);
+    return {
+      message: 'User fetched successfully',
+      data: serialize(UserResponseDto, user),
+    };
   }
 
-  async findAllUserPersonas(userId: number) {
-    return this.userPersonaRepo.find({
+  async findAllUserPersonas(
+    userId: number,
+  ): Promise<ServiceResponse<UserPersonaResponseDto[]>> {
+    const personas = await this.userPersonaRepo.find({
       where: { userId },
       relations: ['role', 'role.roleHasPermissions'],
     });
-  }
 
-  private sanitizeUser(user: User) {
-    const { password, rememberToken, tsv, ...safe } = user as any;
-    return safe;
+    return {
+      message: 'User personas fetched successfully',
+      data: serialize(UserPersonaResponseDto, personas),
+    };
   }
 }

@@ -13,6 +13,6 @@ import { RoleHasPermission } from 'db-schema/role-has-permission.entity';
   ],
   controllers: [RolesPermissionController],
   providers: [RolesPermissionService],
-  exports:[RolesPermissionService]
+  exports: [RolesPermissionService],
 })
 export class RolesPermissionModule {}

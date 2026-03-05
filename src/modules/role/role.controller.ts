@@ -2,10 +2,11 @@ import {
   Controller,
   Get,
   Post,
-  Put,
+  Patch,
   Delete,
   Body,
   Param,
+  Query,
   ParseIntPipe,
   HttpCode,
   HttpStatus,
@@ -15,6 +16,7 @@ import { RoleService } from './role.service';
 import { CreateRoleDto } from './dtos/create-role.dto';
 import { UpdateRoleDto } from './dtos/update-role.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import type { PaginationOptions } from 'src/common/interfaces/paginated.interface';
 
 @Controller('roles')
 @UseGuards(JwtAuthGuard)
@@ -28,8 +30,12 @@ export class RoleController {
   }
 
   @Get()
-  getAllRoles() {
-    return this.roleService.getAllRoles();
+  getAllRoles(
+    @Query('page', new ParseIntPipe({ optional: true })) page = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit = 10,
+  ) {
+    const pagination: PaginationOptions = { page, limit };
+    return this.roleService.getAllRoles(pagination);
   }
 
   @Get(':id')
@@ -37,7 +43,7 @@ export class RoleController {
     return this.roleService.getRoleById(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   updateRole(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateRoleDto: UpdateRoleDto,

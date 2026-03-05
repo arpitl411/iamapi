@@ -1,18 +1,27 @@
 import {
-  Injectable,
-  NotFoundException,
   BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Role } from 'db-schema/role.entity';
 import { Permission } from 'db-schema/permission.entity';
 import { User } from 'db-schema/user.entity';
+import { serialize } from 'src/common/helpers/serialize.helper';
+import { getPaginationOptions } from 'src/common/helpers/pagination.helper';
+import { ServiceResponse } from 'src/common/interfaces/api-response.interface';
+import { PaginationOptions } from 'src/common/interfaces/paginated.interface';
 import { CreateRoleDto } from './dtos/create-role.dto';
 import { UpdateRoleDto } from './dtos/update-role.dto';
+import { RoleResponseDto } from './dtos/role-response.dto';
 
 @Injectable()
 export class RoleService {
+  private readonly logger = new Logger(RoleService.name);
+
   constructor(
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
@@ -22,9 +31,19 @@ export class RoleService {
     private readonly userRepository: Repository<User>,
   ) {}
 
+  // Internal helper — returns raw Role entity for mutation operations
+  private async findRoleOrFail(id: number): Promise<Role> {
+    const role = await this.roleRepository.findOne({
+      where: { id },
+      relations: ['permissions'],
+    });
+    if (!role) throw new NotFoundException('Role not found');
+    return role;
+  }
+
   async createRole(
     createRoleDto: CreateRoleDto,
-  ): Promise<{ message: string; data: Role }> {
+  ): Promise<ServiceResponse<RoleResponseDto>> {
     const { permission_ids, user_email, ...roleData } = createRoleDto;
 
     const existingRole = await this.roleRepository.findOne({
@@ -32,10 +51,11 @@ export class RoleService {
     });
 
     if (existingRole) {
-      throw new BadRequestException(
+      throw new ConflictException(
         `Role with name '${roleData.name}' already exists`,
       );
     }
+
     const role = this.roleRepository.create(roleData);
 
     if (permission_ids && permission_ids.length > 0) {
@@ -55,14 +75,17 @@ export class RoleService {
     if (user_email) {
       await this.handleUserRoleAssignment(user_email, savedRole);
     }
+
     const roleWithPermissions = await this.roleRepository.findOne({
       where: { id: savedRole.id },
       relations: ['permissions'],
     });
 
+    this.logger.log(`Role created: ${savedRole.name}`);
+
     return {
       message: 'Role created successfully',
-      data: roleWithPermissions!,
+      data: serialize(RoleResponseDto, roleWithPermissions!),
     };
   }
 
@@ -103,52 +126,60 @@ export class RoleService {
     }
   }
 
+  async getAllRoles(
+    pagination?: PaginationOptions,
+  ): Promise<ServiceResponse<RoleResponseDto[]>> {
+    const { skip, take } = getPaginationOptions(
+      pagination ?? { page: 1, limit: 10 },
+    );
 
-  async getAllRoles(): Promise<{ message: string; data: Role[] }> {
-    const roles = await this.roleRepository.find({
+    const [roles, total] = await this.roleRepository.findAndCount({
       relations: ['permissions'],
+      skip,
+      take,
     });
-    return { message: 'Roles fetched successfully', data: roles };
+
+    return {
+      message: 'Roles fetched successfully',
+      data: serialize(RoleResponseDto, roles),
+      meta: {
+        page: pagination?.page ?? 1,
+        limit: take,
+        total,
+        totalPages: Math.ceil(total / take),
+      },
+    };
   }
 
-  async getRoleById(id: number): Promise<{ message: string; data: Role }> {
-    const role = await this.roleRepository.findOne({
-      where: { id },
-      relations: ['permissions'],
-    });
-
-    if (!role) {
-      throw new NotFoundException('Role not found');
-    }
-
-    return { message: 'Role fetched successfully', data: role };
+  async getRoleById(id: number): Promise<ServiceResponse<RoleResponseDto>> {
+    const role = await this.findRoleOrFail(id);
+    return {
+      message: 'Role fetched successfully',
+      data: serialize(RoleResponseDto, role),
+    };
   }
 
   async updateRole(
     id: number,
     updateRoleDto: UpdateRoleDto,
-  ): Promise<{ message: string; data: Role }> {
-    const { data: role } = await this.getRoleById(id);
-
+  ): Promise<ServiceResponse<RoleResponseDto>> {
+    const role = await this.findRoleOrFail(id);
     const { permission_ids, ...roleData } = updateRoleDto;
 
-    // Check if updating to a name that already exists (for a different role)
     if (roleData.name) {
       const existingRole = await this.roleRepository.findOne({
         where: { name: roleData.name },
       });
 
       if (existingRole && existingRole.id !== id) {
-        throw new BadRequestException(
+        throw new ConflictException(
           `Role with name '${roleData.name}' already exists`,
         );
       }
     }
 
-    // Update basic role data
     Object.assign(role, roleData);
 
-    // If permission IDs are provided, update permissions
     if (permission_ids !== undefined) {
       if (permission_ids.length > 0) {
         const permissions = await this.permissionRepository.find({
@@ -161,14 +192,14 @@ export class RoleService {
 
         role.permissions = permissions;
       } else {
-        // If empty array is provided, remove all permissions
+        // Empty array → remove all permissions
         role.permissions = [];
       }
     }
 
     const updatedRole = await this.roleRepository.save(role);
+    this.logger.log(`Role updated: id=${id}`);
 
-    // Return role with updated permissions
     const roleWithPermissions = await this.roleRepository.findOne({
       where: { id: updatedRole.id },
       relations: ['permissions'],
@@ -176,13 +207,14 @@ export class RoleService {
 
     return {
       message: 'Role updated successfully',
-      data: roleWithPermissions!,
+      data: serialize(RoleResponseDto, roleWithPermissions!),
     };
   }
 
-  async deleteRole(id: number): Promise<{ message: string; data: null }> {
-    const { data: role } = await this.getRoleById(id);
+  async deleteRole(id: number): Promise<ServiceResponse<null>> {
+    const role = await this.findRoleOrFail(id);
     await this.roleRepository.remove(role);
+    this.logger.log(`Role deleted: id=${id}`);
     return { message: 'Role deleted successfully', data: null };
   }
 }
