@@ -35,6 +35,7 @@ export class RolesPermissionService {
 
     private readonly dataSource: DataSource,
   ) {}
+
   async createUser(dto: CreateUserDto) {
     const existing = await this.userRepo.findOne({
       where: { email: dto.email },
@@ -110,6 +111,7 @@ export class RolesPermissionService {
       };
     });
   }
+
   async createUserPersona(dto: CreateUserPersonaDto) {
     const user = await this.userRepo.findOne({ where: { id: dto.userId } });
     if (!user) throw new NotFoundException(`User ${dto.userId} not found`);
@@ -126,16 +128,38 @@ export class RolesPermissionService {
 
     return this.userPersonaRepo.save(persona);
   }
+
+  async assignPermissionsToRole(dto: AssignPermissionsToRoleDto) {
+    const role = await this.roleRepo.findOne({ where: { id: dto.roleId } });
+    if (!role) throw new NotFoundException(`Role ${dto.roleId} not found`);
+
+    const existing = await this.rolePermRepo.find({
+      where: { roleId: dto.roleId, permissionId: In(dto.permissionIds) },
+    });
+
+    const existingIds = new Set(existing.map((e) => e.permissionId));
+    const newIds = dto.permissionIds.filter((id) => !existingIds.has(id));
+
+    if (newIds.length === 0) {
+      return { message: 'All permissions already assigned', role };
+    }
+
+    const perms = newIds.map((pid) =>
+      this.rolePermRepo.create({ roleId: dto.roleId, permissionId: pid }),
+    );
+
+    const saved = await this.rolePermRepo.save(perms);
+    return { role, assignedPermissions: saved };
+  }
+
   async findUserWithPersonasAndPermissions(userId: number) {
     const user = await this.userRepo.findOne({
       where: { id: userId },
-      relations: {
-        userPersonas: {
-          role: {
-            permissions: true,
-          },
-        },
-      },
+      relations: [
+        'userPersonas',
+        'userPersonas.role',
+        'userPersonas.role.roleHasPermissions',
+      ],
     });
 
     if (!user) {

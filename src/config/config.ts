@@ -4,13 +4,14 @@ export default () => ({
 
   database: {
     host: process.env.DB_HOST,
-    port: process.env.DB_PORT
-      ? parseInt(process.env.DB_PORT, 10)
-      : undefined,
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : undefined,
     name: process.env.DB_NAME,
     user: process.env.DB_USERNAME,
     pass: process.env.DB_PASSWORD,
-    ssl: process.env.SSL_MODE === 'true',
+    ssl:
+      process.env.SSL_MODE === 'false'
+        ? false
+        : process.env.SSL_MODE === 'true',
   },
 
   keycloak: {

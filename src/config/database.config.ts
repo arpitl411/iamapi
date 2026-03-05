@@ -5,7 +5,8 @@ import { CustomConfigService } from 'utils/db-config/custom-config.service';
 export async function getDBConfig(
   configService: CustomConfigService,
 ): Promise<TypeOrmModuleOptions> {
-  const sslEnabled = await configService.get<boolean>('SSL_MODE', false);
+  const sslEnabled =
+    (await configService.get<string>('SSL_MODE', 'false')) === 'true';
 
   const host = await configService.get<string>('DB_HOST');
   const port = Number(await configService.get<number>('DB_PORT'));

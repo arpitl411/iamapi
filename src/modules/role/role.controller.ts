@@ -9,57 +9,45 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { RoleService } from './role.service';
 import { CreateRoleDto } from './dtos/create-role.dto';
 import { UpdateRoleDto } from './dtos/update-role.dto';
-import { Role } from 'db-schema/role.entity';
-import { AssignPermissionsToRoleDto } from '../roles-permission/dtos/create-user.dto';
-import { RolesPermissionService } from '../roles-permission/roles-permission.service';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
 @Controller('roles')
+@UseGuards(JwtAuthGuard)
 export class RoleController {
-  constructor(private readonly roleService: RoleService,
-    // private rolesPermissionService: RolesPermissionService
-  ) {}
+  constructor(private readonly roleService: RoleService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async createRole(
-    @Body() createRoleDto: CreateRoleDto,
-  ): Promise<{ message: string; role: Role }> {
+  createRole(@Body() createRoleDto: CreateRoleDto) {
     return this.roleService.createRole(createRoleDto);
   }
 
   @Get()
-  async getAllRoles(): Promise<Role[]> {
+  getAllRoles() {
     return this.roleService.getAllRoles();
   }
 
   @Get(':id')
-  async getRoleById(@Param('id', ParseIntPipe) id: number): Promise<Role> {
+  getRoleById(@Param('id', ParseIntPipe) id: number) {
     return this.roleService.getRoleById(id);
   }
 
   @Put(':id')
-  async updateRole(
+  updateRole(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateRoleDto: UpdateRoleDto,
-  ): Promise<{ message: string; role: Role }> {
+  ) {
     return this.roleService.updateRole(id, updateRoleDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  async deleteRole(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<{ message: string }> {
+  deleteRole(@Param('id', ParseIntPipe) id: number) {
     return this.roleService.deleteRole(id);
   }
-
-  // @Post('permissions')
-  // @HttpCode(HttpStatus.CREATED)
-  // async assignPermissions(@Body() dto: AssignPermissionsToRoleDto) {
-  //   return this.rolesPermissionService.assignPermissionsToRole(dto);
-  // }
 }

@@ -1,0 +1,224 @@
+{
+  "info": {
+    "name": "IAM API",
+    "description": "Identity & Access Management API — full endpoint collection.\n\n**Setup:**\n1. Import this collection\n2. Import `IAM-API.postman_environment.json` alongside it\n3. Select the `IAM API - Local` environment\n4. Run **Auth / Login** — the token is auto-saved to `{{token}}`\n5. All protected routes use `{{token}}` automatically",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"secret123\",\n  \"phone_country_code\": \"+1\",\n  \"phone_no\": \"5555555555\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.access_token) {",
+                  "  pm.environment.set('token', res.data.access_token);",
+                  "  console.log('Token saved to environment');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"secret123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/auth", "host": ["{{baseUrl}}"], "path": ["auth"] }
+          }
+        },
+        {
+          "name": "Get Me (Current User)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/auth/1", "host": ["{{baseUrl}}"], "path": ["auth", "1"] }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/1", "host": ["{{baseUrl}}"], "path": ["auth", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Jane\",\n  \"email\": \"jane.doe@example.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/auth/1", "host": ["{{baseUrl}}"], "path": ["auth", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "item": [
+        {
+          "name": "Create Role",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/roles", "host": ["{{baseUrl}}"], "path": ["roles"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"admin\",\n  \"guard_name\": \"web\",\n  \"permission_ids\": [1, 2],\n  \"user_email\": \"john.doe@example.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Roles",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/roles", "host": ["{{baseUrl}}"], "path": ["roles"] }
+          }
+        },
+        {
+          "name": "Get Role by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/roles/1", "host": ["{{baseUrl}}"], "path": ["roles", "1"] }
+          }
+        },
+        {
+          "name": "Update Role",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/roles/1", "host": ["{{baseUrl}}"], "path": ["roles", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"super-admin\",\n  \"guard_name\": \"web\",\n  \"permission_ids\": [1, 2, 3]\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Role",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/roles/1", "host": ["{{baseUrl}}"], "path": ["roles", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Permissions",
+      "item": [
+        {
+          "name": "Get All Permissions",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/permissions", "host": ["{{baseUrl}}"], "path": ["permissions"] }
+          }
+        },
+        {
+          "name": "Get Permission by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/permissions/1", "host": ["{{baseUrl}}"], "path": ["permissions", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Roles & Permissions",
+      "item": [
+        {
+          "name": "Create User with Role",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/roles-permission", "host": ["{{baseUrl}}"], "path": ["roles-permission"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"secret123\",\n  \"firstName\": \"New\",\n  \"lastName\": \"User\",\n  \"roleId\": 1,\n  \"permissionIds\": [1, 2]\n}"
+            }
+          }
+        },
+        {
+          "name": "Get User with Personas & Permissions",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/roles-permission/1", "host": ["{{baseUrl}}"], "path": ["roles-permission", "1"] }
+          }
+        },
+        {
+          "name": "Create User Persona",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/roles-permission/persona", "host": ["{{baseUrl}}"], "path": ["roles-permission", "persona"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"roleId\": 1,\n  \"personaId\": 1,\n  \"isDefault\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Personas for User",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/roles-permission/1/personas", "host": ["{{baseUrl}}"], "path": ["roles-permission", "1", "personas"] }
+          }
+        }
+      ]
+    }
+  ]
+}

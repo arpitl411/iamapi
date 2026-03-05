@@ -1,13 +1,20 @@
-import { IsString, IsNotEmpty, IsArray, IsOptional, IsInt, IsEmail } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsArray,
+  IsOptional,
+  IsInt,
+  IsEmail,
+} from 'class-validator';
 
 export class CreateRoleDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @IsString()
   @IsNotEmpty()
-  guard_name: string;
+  guard_name!: string;
 
   @IsOptional()
   @IsEmail()

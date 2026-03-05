@@ -12,11 +12,11 @@ import {
 export class CreateUserDto {
   @IsNotEmpty()
   @IsEmail()
-  email: string;
+  email!: string;
 
   @IsNotEmpty()
   @IsString()
-  password: string;
+  password!: string;
 
   @IsOptional()
   @IsString()
@@ -40,7 +40,7 @@ export class CreateUserDto {
   /** Role to assign to the new user (maps to roles.id) */
   @IsNotEmpty()
   @IsNumber()
-  roleId: number;
+  roleId!: number;
 
   @IsOptional()
   @IsArray()
@@ -48,15 +48,14 @@ export class CreateUserDto {
   permissionIds?: number[];
 }
 
-
 export class CreateUserPersonaDto {
   @IsNotEmpty()
   @IsNumber()
-  userId: number;
+  userId!: number;
 
   @IsNotEmpty()
   @IsNumber()
-  roleId: number;
+  roleId!: number;
 
   @IsOptional()
   @IsNumber()
@@ -70,10 +69,10 @@ export class CreateUserPersonaDto {
 export class AssignPermissionsToRoleDto {
   @IsNotEmpty()
   @IsNumber()
-  roleId: number;
+  roleId!: number;
 
   @IsArray()
   @ArrayMinSize(1)
   @IsNumber({}, { each: true })
-  permissionIds: number[];
+  permissionIds!: number[];
 }
