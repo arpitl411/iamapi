@@ -1,17 +1,25 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleHasPermission } from 'db-schema/role-has-permission.entity';
 import { Role } from 'db-schema/role.entity';
 import { UserPersona } from 'db-schema/user-persons.entity';
 import { User } from 'db-schema/user.entity';
-import { AssignPermissionsToRoleDto, CreateUserDto, CreateUserPersonaDto } from './dtos/create-user.dto';
+import {
+  AssignPermissionsToRoleDto,
+  CreateUserDto,
+  CreateUserPersonaDto,
+} from './dtos/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSource, In, Repository } from 'typeorm';
 
 @Injectable()
 export class RolesPermissionService {
-    constructor(
+  constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
 
@@ -26,6 +34,7 @@ export class RolesPermissionService {
 
     private readonly dataSource: DataSource,
   ) {}
+
   async createUser(dto: CreateUserDto) {
     const existing = await this.userRepo.findOne({
       where: { email: dto.email },
@@ -61,8 +70,8 @@ export class RolesPermissionService {
       const userPersona = manager.create(UserPersona, {
         userId: savedUser.id,
         roleId: role.id,
-        personaId: 3,       // business default
-        isDefault: true,    // business default
+        personaId: 3, // business default
+        isDefault: true, // business default
       });
 
       const savedPersona = await manager.save(UserPersona, userPersona);
@@ -99,6 +108,7 @@ export class RolesPermissionService {
       };
     });
   }
+
   async createUserPersona(dto: CreateUserPersonaDto) {
     const user = await this.userRepo.findOne({ where: { id: dto.userId } });
     if (!user) throw new NotFoundException(`User ${dto.userId} not found`);
@@ -115,7 +125,6 @@ export class RolesPermissionService {
 
     return this.userPersonaRepo.save(persona);
   }
-
 
   async assignPermissionsToRole(dto: AssignPermissionsToRoleDto) {
     const role = await this.roleRepo.findOne({ where: { id: dto.roleId } });
@@ -143,7 +152,11 @@ export class RolesPermissionService {
   async findUserWithPersonasAndPermissions(userId: number) {
     const user = await this.userRepo.findOne({
       where: { id: userId },
-      relations: ['userPersonas', 'userPersonas.role', 'userPersonas.role.roleHasPermissions'],
+      relations: [
+        'userPersonas',
+        'userPersonas.role',
+        'userPersonas.role.roleHasPermissions',
+      ],
     });
 
     if (!user) throw new NotFoundException(`User ${userId} not found`);

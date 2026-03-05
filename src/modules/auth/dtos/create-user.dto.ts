@@ -10,10 +10,10 @@ export class CreateUserDto {
   last_name?: string;
 
   @IsEmail()
-  email: string;
+  email!: string;
 
   @MinLength(6)
-  password: string;
+  password!: string;
 
   @IsOptional()
   @IsString()

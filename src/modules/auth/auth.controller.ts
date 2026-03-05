@@ -6,68 +6,78 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
   ParseIntPipe,
   UseGuards,
-  Req,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
+import type { PaginationOptions } from 'src/common/interfaces/paginated.interface';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { LoginDto } from './dtos/login.dto';
 import { AuthService } from './auth.service';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { Public } from 'src/common/decorators/public.decorator';
+import type { AuthenticatedUser } from 'src/common/interfaces/jwt-payload.interface';
 
 @Controller('auth')
-
+@UseGuards(JwtAuthGuard)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('create-user')
-  // @UseGuards(JwtAuthGuard)
-  create(@Body() createUserDto: CreateUserDto) {
+  @Post('register')
+  @Public()
+  @HttpCode(HttpStatus.CREATED)
+  register(@Body() createUserDto: CreateUserDto) {
     return this.authService.createUser(createUserDto);
   }
 
-  @Get('getAll')
-  @UseGuards(JwtAuthGuard)
-  findAll() {
-    return this.authService.GetAllUser();
+  @Post('login')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  login(@Body() loginDto: LoginDto) {
+    return this.authService.login(loginDto);
+  }
+
+  @Get()
+  findAll(
+    @Query('page', new ParseIntPipe({ optional: true })) page = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit = 10,
+  ) {
+    const pagination: PaginationOptions = { page, limit };
+    return this.authService.getAllUsers(pagination);
+  }
+
+  @Get('me')
+  getMe(@CurrentUser() user: AuthenticatedUser) {
+    return this.authService.getById(user.userId);
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
   findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.authService.GetById(id);
+    return this.authService.getById(id);
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
-  UpdateUser(
+  update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return this.authService.UpdateUser(id, updateUserDto);
+    return this.authService.updateUser(id, updateUserDto);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
   remove(@Param('id', ParseIntPipe) id: number) {
-    return this.authService.DeleteUser(id);
+    return this.authService.deleteUser(id);
   }
 
   @Post('verify')
-  async verify(@Body() body: CreateUserDto) {
-    const user = await this.authService.validateUser(
-      body.email,
-      body.password,
-    );
-
-    return {
-      message: 'Credentials are valid',
-      userId: user.id,
-      
-    };
-  }
-  @Post('login')
-  async login(@Body() body: CreateUserDto) {
-    return this.authService.login(body.email, body.password);
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  async verify(@Body() loginDto: LoginDto) {
+    return this.authService.login(loginDto);
   }
 }

@@ -7,14 +7,18 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { RolesPermissionService } from './roles-permission.service';
 import { CreateUserDto, CreateUserPersonaDto } from './dtos/create-user.dto';
-
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
 @Controller('roles-permission')
+@UseGuards(JwtAuthGuard)
 export class RolesPermissionController {
-    constructor(private readonly rolesPermissionService: RolesPermissionService) {}
+  constructor(
+    private readonly rolesPermissionService: RolesPermissionService,
+  ) {}
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createUser(@Body() dto: CreateUserDto) {
@@ -26,8 +30,10 @@ export class RolesPermissionController {
   // Fetch user with personas + role + permissions
   // ──────────────────────────────────────────────────────────────────────────
   @Get(':id')
-  async getUser(@Param('id', ParseIntPipe) id: number) {
-    return this.rolesPermissionService.findUserWithPersonasAndPermissions(id);
+  async getUser(@Param('id', ParseIntPipe) id: number): Promise<any> {
+    return await this.rolesPermissionService.findUserWithPersonasAndPermissions(
+      id,
+    );
   }
 
   // ──────────────────────────────────────────────────────────────────────────
