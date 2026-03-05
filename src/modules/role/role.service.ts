@@ -24,10 +24,9 @@ export class RoleService {
 
   async createRole(
     createRoleDto: CreateRoleDto,
-  ): Promise<{ message: string; role: Role }> {
+  ): Promise<{ message: string; data: Role }> {
     const { permission_ids, user_email, ...roleData } = createRoleDto;
 
-    // Check if role with same name already exists
     const existingRole = await this.roleRepository.findOne({
       where: { name: roleData.name },
     });
@@ -63,7 +62,7 @@ export class RoleService {
 
     return {
       message: 'Role created successfully',
-      role: roleWithPermissions!,
+      data: roleWithPermissions!,
     };
   }
 
@@ -71,17 +70,14 @@ export class RoleService {
     userEmail: string,
     role: Role,
   ): Promise<void> {
-    let user = await this.userRepository.findOne({
+    const user = await this.userRepository.findOne({
       where: { email: userEmail },
       relations: ['roles'],
     });
 
     if (user) {
       // User exists, assign the role
-      if (
-        user.roles &&
-        !user.roles.find((r) => r.id === role.id)
-      ) {
+      if (user.roles && !user.roles.find((r) => r.id === role.id)) {
         user.roles.push(role);
         await this.userRepository.save(user);
       }
@@ -103,36 +99,36 @@ export class RoleService {
         roles: defaultRole ? [defaultRole, role] : [role],
       });
 
-
       await this.userRepository.save(newUser);
     }
   }
 
 
-  async getAllRoles(): Promise<Role[]> {
-    return this.roleRepository.find({
+  async getAllRoles(): Promise<{ message: string; data: Role[] }> {
+    const roles = await this.roleRepository.find({
       relations: ['permissions'],
     });
+    return { message: 'Roles fetched successfully', data: roles };
   }
 
-  async getRoleById(id: number): Promise<Role> {
+  async getRoleById(id: number): Promise<{ message: string; data: Role }> {
     const role = await this.roleRepository.findOne({
       where: { id },
       relations: ['permissions'],
     });
 
     if (!role) {
-      throw new NotFoundException(`Role with ID ${id} not found`);
+      throw new NotFoundException('Role not found');
     }
 
-    return role;
+    return { message: 'Role fetched successfully', data: role };
   }
 
   async updateRole(
     id: number,
     updateRoleDto: UpdateRoleDto,
-  ): Promise<{ message: string; role: Role }> {
-    const role = await this.getRoleById(id);
+  ): Promise<{ message: string; data: Role }> {
+    const { data: role } = await this.getRoleById(id);
 
     const { permission_ids, ...roleData } = updateRoleDto;
 
@@ -180,13 +176,13 @@ export class RoleService {
 
     return {
       message: 'Role updated successfully',
-      role: roleWithPermissions!,
+      data: roleWithPermissions!,
     };
   }
 
-  async deleteRole(id: number): Promise<{ message: string }> {
-    const role = await this.getRoleById(id);
+  async deleteRole(id: number): Promise<{ message: string; data: null }> {
+    const { data: role } = await this.getRoleById(id);
     await this.roleRepository.remove(role);
-    return { message: 'Role deleted successfully' };
+    return { message: 'Role deleted successfully', data: null };
   }
 }
