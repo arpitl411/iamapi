@@ -30,6 +30,13 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  // Internal helper — returns raw User entity for mutation operations
+  private async findUserOrFail(id: number): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
   async createUser(
     createUserDto: CreateUserDto,
   ): Promise<ServiceResponse<UserResponseDto>> {
@@ -84,12 +91,7 @@ export class AuthService {
   }
 
   async getById(id: number): Promise<ServiceResponse<UserResponseDto>> {
-    const user = await this.userRepository.findOne({ where: { id } });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
+    const user = await this.findUserOrFail(id);
     return {
       message: 'User fetched successfully',
       data: serialize(UserResponseDto, user),
@@ -100,11 +102,7 @@ export class AuthService {
     id: number,
     updateUserDto: UpdateUserDto,
   ): Promise<ServiceResponse<UserResponseDto>> {
-    const user = await this.userRepository.findOne({ where: { id } });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    const user = await this.findUserOrFail(id);
 
     if (updateUserDto.password) {
       updateUserDto.password = await hashPassword(updateUserDto.password);
@@ -122,12 +120,8 @@ export class AuthService {
   }
 
   async deleteUser(id: number): Promise<ServiceResponse<null>> {
-    const result = await this.userRepository.delete(id);
-
-    if (result.affected === 0) {
-      throw new NotFoundException('User not found');
-    }
-
+    const user = await this.findUserOrFail(id);
+    await this.userRepository.remove(user);
     this.logger.log(`User deleted: id=${id}`);
     return { message: 'User deleted successfully', data: null };
   }

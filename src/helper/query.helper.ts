@@ -1,4 +1,8 @@
-import { FiltersOptions, PaginationMetadata, SortOptions } from 'src/interface/common.interface';
+import {
+  FiltersOptions,
+  PaginationMetadata,
+  SortOptions,
+} from 'src/interface/common.interface';
 import { ObjectLiteral, SelectQueryBuilder } from 'typeorm';
 
 export function applyPagination<T extends ObjectLiteral>(
@@ -6,7 +10,7 @@ export function applyPagination<T extends ObjectLiteral>(
   page: number,
   limit: number,
   table: string,
-  sort?: SortOptions
+  sort?: SortOptions,
 ): PaginationMetadata {
   const offset = (page - 1) * limit;
 
@@ -19,9 +23,15 @@ export function applyPagination<T extends ObjectLiteral>(
     sort.forEach((sortOption, index) => {
       if (sortOption.field) {
         if (index === 0) {
-          queryBuilder.orderBy(`${table}.${sortOption.field}`, sortOption.order);
+          queryBuilder.orderBy(
+            `${table}.${sortOption.field}`,
+            sortOption.order,
+          );
         } else {
-          queryBuilder.addOrderBy(`${table}.${sortOption.field}`, sortOption.order);
+          queryBuilder.addOrderBy(
+            `${table}.${sortOption.field}`,
+            sortOption.order,
+          );
         }
       }
     });
@@ -38,12 +48,12 @@ export function advancedSearch<T extends ObjectLiteral>(
   queryBuilderAdvance: SelectQueryBuilder<T>,
   filters: FiltersOptions,
   search: string,
-  isFirstConditionInWhere: boolean
+  isFirstConditionInWhere: boolean,
 ) {
   Object.entries(filters).forEach(([field, value]) => {
     if (value) {
       if (Array.isArray(value)) {
-        value.forEach((val) => { 
+        value.forEach((val) => {
           if (isFirstConditionInWhere) {
             queryBuilderAdvance.where(`${field}.${val} LIKE :${val}`, {
               [`${val}`]: `%${search}%`,
