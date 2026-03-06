@@ -1,0 +1,243 @@
+{
+  "info": {
+    "name": "Dynamic Calculators - Minimal",
+    "description": "Minimal Postman collection for one-go Dynamic Calculator flow.\n\nRun order:\n1. Auth / Login\n2. One-Go / Calculator - Bulk Create\n3. One-Go / Publish - Calculator\n4. One-Go / Publish - Embed",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api", "type": "string" },
+    { "key": "apiV1Prefix", "value": "api/v1", "type": "string" },
+    { "key": "orgId", "value": "org_123", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "calculatorId", "value": "", "type": "string" },
+    { "key": "pageId", "value": "", "type": "string" },
+    { "key": "sectionId", "value": "", "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{token}}", "type": "string" }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "const token = res?.data?.access_token || res?.access_token;",
+                  "if (token) {",
+                  "  pm.collectionVariables.set('token', token);",
+                  "  pm.environment.set('token', token);",
+                  "  console.log('Token saved');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"secret123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "One-Go",
+      "item": [
+        {
+          "name": "Calculator - Bulk Create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "const id = res?.data?.id || res?.data?.calculator?.id || res?.id;",
+                  "if (id) {",
+                  "  pm.collectionVariables.set('calculatorId', id);",
+                  "  pm.environment.set('calculatorId', id);",
+                  "  console.log('calculatorId saved:', id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"One-Go Loan EMI Calculator\",\n  \"description\": \"Created in one API call\",\n  \"category\": \"loan\",\n  \"pages\": [\n    {\n      \"title\": \"Loan Inputs\",\n      \"order\": 1,\n      \"isResultPage\": false,\n      \"sections\": [\n        {\n          \"name\": \"Primary Inputs\",\n          \"order\": 1,\n          \"columns\": 2,\n          \"fields\": [\n            {\n              \"type\": \"number\",\n              \"label\": \"Loan Amount\",\n              \"variableName\": \"loan_amount\",\n              \"required\": true,\n              \"order\": 1,\n              \"min\": 1000\n            },\n            {\n              \"type\": \"number\",\n              \"label\": \"Annual Interest Rate\",\n              \"variableName\": \"annual_rate\",\n              \"required\": true,\n              \"order\": 2,\n              \"min\": 0\n            },\n            {\n              \"type\": \"number\",\n              \"label\": \"Tenure (Months)\",\n              \"variableName\": \"tenure_months\",\n              \"required\": true,\n              \"order\": 3,\n              \"min\": 1\n            }\n          ]\n        }\n      ]\n    }\n  ],\n  \"design\": {\n    \"primaryColor\": \"#2563eb\",\n    \"backgroundColor\": \"#ffffff\",\n    \"fontFamily\": \"DM Sans\",\n    \"fontSize\": \"md\",\n    \"buttonColor\": \"#2563eb\",\n    \"buttonTextColor\": \"#ffffff\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{apiV1Prefix}}/organizations/{{orgId}}/calculators/bulk",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiV1Prefix}}", "organizations", "{{orgId}}", "calculators", "bulk"]
+            }
+          }
+        },
+        {
+          "name": "Publish - Calculator",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/publish",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "publish"]
+            }
+          }
+        },
+        {
+          "name": "Publish - Embed",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/publish/embed",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "publish", "embed"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fallback Step-By-Step",
+      "item": [
+        {
+          "name": "Calculators - Create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "const id = res?.data?.id || res?.id;",
+                  "if (id) { pm.environment.set('calculatorId', id); pm.collectionVariables.set('calculatorId', id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Fallback Insurance Calculator\",\n  \"description\": \"Step-by-step fallback flow\",\n  \"category\": \"insurance\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{apiV1Prefix}}/organizations/{{orgId}}/calculators",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiV1Prefix}}", "organizations", "{{orgId}}", "calculators"]
+            }
+          }
+        },
+        {
+          "name": "Pages - Create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "const id = res?.data?.id || res?.id;",
+                  "if (id) { pm.environment.set('pageId', id); pm.collectionVariables.set('pageId', id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Personal Information\",\n  \"order\": 1,\n  \"isResultPage\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/pages",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "pages"]
+            }
+          }
+        },
+        {
+          "name": "Sections - Create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "const id = res?.data?.id || res?.id;",
+                  "if (id) { pm.environment.set('sectionId', id); pm.collectionVariables.set('sectionId', id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Basic Details\",\n  \"order\": 1,\n  \"columns\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{apiV1Prefix}}/pages/{{pageId}}/sections",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiV1Prefix}}", "pages", "{{pageId}}", "sections"]
+            }
+          }
+        },
+        {
+          "name": "Fields - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"number\",\n  \"label\": \"Age\",\n  \"variableName\": \"user_age\",\n  \"required\": true,\n  \"order\": 1,\n  \"min\": 18,\n  \"max\": 100\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{apiV1Prefix}}/sections/{{sectionId}}/fields",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiV1Prefix}}", "sections", "{{sectionId}}", "fields"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -14,7 +14,7 @@ import {
   CreateUserDto,
   CreateUserPersonaDto,
 } from './dtos/create-user.dto';
-import { v4 as uuidv4 } from 'uuid';
+//import { v4 as uuidv4 } from 'uuid';
 import { DataSource, In, Repository } from 'typeorm';
 import { hashPassword } from 'src/common/helpers/hash.helper';
 import { serialize } from 'src/common/helpers/serialize.helper';
@@ -73,7 +73,7 @@ export class RolesPermissionService {
         timezone: dto.timezone,
         phoneCountryCode: dto.phoneCountryCode,
         phoneNo: dto.phoneNo,
-        uuid: uuidv4(),
+        //uuid: uuidv4(),
         active: true,
         confirmed: false,
         newUser: true,

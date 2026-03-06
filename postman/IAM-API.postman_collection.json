@@ -9,6 +9,51 @@
       "key": "baseUrl",
       "value": "http://localhost:3000/api",
       "type": "string"
+    },
+    {
+      "key": "orgId",
+      "value": "org_123",
+      "type": "string"
+    },
+    {
+      "key": "calculatorId",
+      "value": "calculator_id_here",
+      "type": "string"
+    },
+    {
+      "key": "pageId",
+      "value": "page_id_here",
+      "type": "string"
+    },
+    {
+      "key": "sectionId",
+      "value": "section_id_here",
+      "type": "string"
+    },
+    {
+      "key": "fieldId",
+      "value": "field_id_here",
+      "type": "string"
+    },
+    {
+      "key": "formulaId",
+      "value": "formula_id_here",
+      "type": "string"
+    },
+    {
+      "key": "ruleId",
+      "value": "rule_id_here",
+      "type": "string"
+    },
+    {
+      "key": "integrationId",
+      "value": "integration_id_here",
+      "type": "string"
+    },
+    {
+      "key": "apiV1Prefix",
+      "value": "api/v1",
+      "type": "string"
     }
   ],
   "auth": {
@@ -216,6 +261,471 @@
           "request": {
             "method": "GET",
             "url": { "raw": "{{baseUrl}}/roles-permission/1/personas", "host": ["{{baseUrl}}"], "path": ["roles-permission", "1", "personas"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dynamic Calculators",
+      "item": [
+        {
+          "name": "Calculators - Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/organizations/{{orgId}}/calculators", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "organizations", "{{orgId}}", "calculators"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Insurance Premium Calculator\",\n  \"description\": \"Calculate monthly insurance premium\",\n  \"category\": \"insurance\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Calculators - List",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/organizations/{{orgId}}/calculators?status=draft&search=insurance", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "organizations", "{{orgId}}", "calculators"], "query": [{ "key": "status", "value": "draft" }, { "key": "search", "value": "insurance" }] }
+          }
+        },
+        {
+          "name": "Calculators - Stats",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/organizations/{{orgId}}/calculators/stats", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "organizations", "{{orgId}}", "calculators", "stats"] }
+          }
+        },
+        {
+          "name": "Calculators - Get By ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/organizations/{{orgId}}/calculators/{{calculatorId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "organizations", "{{orgId}}", "calculators", "{{calculatorId}}"] }
+          }
+        },
+        {
+          "name": "Calculators - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/organizations/{{orgId}}/calculators/{{calculatorId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "organizations", "{{orgId}}", "calculators", "{{calculatorId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Insurance Premium Calculator V2\",\n  \"description\": \"Updated description\",\n  \"category\": \"insurance\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Calculators - Archive",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/organizations/{{orgId}}/calculators/{{calculatorId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "organizations", "{{orgId}}", "calculators", "{{calculatorId}}"] }
+          }
+        },
+
+        {
+          "name": "Pages - Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/pages", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "pages"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Personal Information\",\n  \"order\": 1,\n  \"isResultPage\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "Pages - List",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/pages", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "pages"] }
+          }
+        },
+        {
+          "name": "Pages - Get By ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/pages/{{pageId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "pages", "{{pageId}}"] }
+          }
+        },
+        {
+          "name": "Pages - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/pages/{{pageId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "pages", "{{pageId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Personal Information - Updated\",\n  \"isResultPage\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "Pages - Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/pages/{{pageId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "pages", "{{pageId}}"] }
+          }
+        },
+        {
+          "name": "Pages - Reorder",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/pages/reorder", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "pages", "reorder"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderedIds\": [\n    \"{{pageId}}\"\n  ]\n}"
+            }
+          }
+        },
+
+        {
+          "name": "Sections - Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/pages/{{pageId}}/sections", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "pages", "{{pageId}}", "sections"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Basic Details\",\n  \"order\": 1,\n  \"columns\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "Sections - List",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/pages/{{pageId}}/sections", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "pages", "{{pageId}}", "sections"] }
+          }
+        },
+        {
+          "name": "Sections - Get By ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/pages/{{pageId}}/sections/{{sectionId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "pages", "{{pageId}}", "sections", "{{sectionId}}"] }
+          }
+        },
+        {
+          "name": "Sections - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/pages/{{pageId}}/sections/{{sectionId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "pages", "{{pageId}}", "sections", "{{sectionId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Basic Details Updated\",\n  \"columns\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Sections - Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/pages/{{pageId}}/sections/{{sectionId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "pages", "{{pageId}}", "sections", "{{sectionId}}"] }
+          }
+        },
+        {
+          "name": "Sections - Reorder",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/pages/{{pageId}}/sections/reorder", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "pages", "{{pageId}}", "sections", "reorder"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderedIds\": [\n    \"{{sectionId}}\"\n  ]\n}"
+            }
+          }
+        },
+
+        {
+          "name": "Fields - Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/sections/{{sectionId}}/fields", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "sections", "{{sectionId}}", "fields"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"number\",\n  \"label\": \"Age\",\n  \"variableName\": \"user_age\",\n  \"required\": true,\n  \"order\": 1,\n  \"min\": 18,\n  \"max\": 100,\n  \"helpText\": \"Enter your age\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Fields - List",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/sections/{{sectionId}}/fields", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "sections", "{{sectionId}}", "fields"] }
+          }
+        },
+        {
+          "name": "Fields - Get By ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/sections/{{sectionId}}/fields/{{fieldId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "sections", "{{sectionId}}", "fields", "{{fieldId}}"] }
+          }
+        },
+        {
+          "name": "Fields - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/sections/{{sectionId}}/fields/{{fieldId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "sections", "{{sectionId}}", "fields", "{{fieldId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"Current Age\",\n  \"required\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Fields - Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/sections/{{sectionId}}/fields/{{fieldId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "sections", "{{sectionId}}", "fields", "{{fieldId}}"] }
+          }
+        },
+        {
+          "name": "Fields - Reorder",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/sections/{{sectionId}}/fields/reorder", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "sections", "{{sectionId}}", "fields", "reorder"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderedIds\": [\n    \"{{fieldId}}\"\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Fields - Duplicate",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/fields/{{fieldId}}/duplicate", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "fields", "{{fieldId}}", "duplicate"] }
+          }
+        },
+
+        {
+          "name": "Formulas - Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/formulas", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "formulas"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Monthly Premium Formula\",\n  \"outputVariable\": \"monthly_premium\",\n  \"type\": \"step\",\n  \"steps\": [\n    {\n      \"operand1\": \"coverage_amount\",\n      \"operator\": \"*\",\n      \"operand2\": \"rate\"\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Formulas - List",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/formulas", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "formulas"] }
+          }
+        },
+        {
+          "name": "Formulas - Variables",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/formulas/variables", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "formulas", "variables"] }
+          }
+        },
+        {
+          "name": "Formulas - Get By ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/formulas/{{formulaId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "formulas", "{{formulaId}}"] }
+          }
+        },
+        {
+          "name": "Formulas - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/formulas/{{formulaId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "formulas", "{{formulaId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Monthly Premium Formula Updated\",\n  \"type\": \"advanced\",\n  \"expression\": \"({{coverage_amount}} * {{rate}}) / 12\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Formulas - Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/formulas/{{formulaId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "formulas", "{{formulaId}}"] }
+          }
+        },
+
+        {
+          "name": "Rules - Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/rules", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "rules"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Age Check\",\n  \"order\": 1,\n  \"conditions\": [\n    {\n      \"field\": \"user_age\",\n      \"operator\": \"greater_or_equal\",\n      \"value\": 18,\n      \"logicOperator\": \"AND\"\n    }\n  ],\n  \"actions\": [\n    {\n      \"type\": \"execute_formula\",\n      \"target\": \"monthly_premium\"\n    }\n  ],\n  \"scope\": \"on_change\",\n  \"isActive\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Rules - List",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/rules", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "rules"] }
+          }
+        },
+        {
+          "name": "Rules - Get By ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/rules/{{ruleId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "rules", "{{ruleId}}"] }
+          }
+        },
+        {
+          "name": "Rules - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/rules/{{ruleId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "rules", "{{ruleId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Age Check Updated\",\n  \"isActive\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Rules - Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/rules/{{ruleId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "rules", "{{ruleId}}"] }
+          }
+        },
+        {
+          "name": "Rules - Reorder",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/rules/reorder", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "rules", "reorder"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderedIds\": [\n    \"{{ruleId}}\"\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Rules - Toggle",
+          "request": {
+            "method": "PATCH",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/rules/{{ruleId}}/toggle", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "rules", "{{ruleId}}", "toggle"] }
+          }
+        },
+
+        {
+          "name": "Integrations - Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/integrations", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "integrations"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Webhook Integration\",\n  \"type\": \"webhook\",\n  \"url\": \"https://webhook.site/your-id\",\n  \"method\": \"POST\",\n  \"headers\": {\n    \"Content-Type\": \"application/json\"\n  },\n  \"payloadMapping\": {\n    \"user_age\": \"age\",\n    \"monthly_premium\": \"premium\"\n  },\n  \"responseMapping\": {\n    \"status\": \"api_status\"\n  },\n  \"triggerOn\": \"on_submit\",\n  \"isActive\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Integrations - List",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/integrations", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "integrations"] }
+          }
+        },
+        {
+          "name": "Integrations - Get By ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/integrations/{{integrationId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "integrations", "{{integrationId}}"] }
+          }
+        },
+        {
+          "name": "Integrations - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/integrations/{{integrationId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "integrations", "{{integrationId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Webhook Integration Updated\",\n  \"isActive\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Integrations - Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/integrations/{{integrationId}}", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "integrations", "{{integrationId}}"] }
+          }
+        },
+        {
+          "name": "Integrations - Toggle",
+          "request": {
+            "method": "PATCH",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/integrations/{{integrationId}}/toggle", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "integrations", "{{integrationId}}", "toggle"] }
+          }
+        },
+        {
+          "name": "Integrations - Test",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/integrations/{{integrationId}}/test", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "integrations", "{{integrationId}}", "test"] }
+          }
+        },
+
+        {
+          "name": "Design - Get",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/design", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "design"] }
+          }
+        },
+        {
+          "name": "Design - Upsert",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/design", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "design"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"primaryColor\": \"#6366f1\",\n  \"backgroundColor\": \"#ffffff\",\n  \"fontFamily\": \"DM Sans\",\n  \"fontSize\": \"md\",\n  \"borderRadius\": 8,\n  \"buttonColor\": \"#6366f1\",\n  \"buttonTextColor\": \"#ffffff\",\n  \"buttonBorderRadius\": 8,\n  \"buttonSize\": \"md\",\n  \"buttonWidth\": \"full\",\n  \"logoUrl\": \"https://example.com/logo.png\",\n  \"headerBgColor\": \"#6366f1\",\n  \"headerTextColor\": \"#ffffff\"\n}"
+            }
+          }
+        },
+
+        {
+          "name": "Publish - Status",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/publish", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "publish"] }
+          }
+        },
+        {
+          "name": "Publish - Calculator",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/publish", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "publish"] }
+          }
+        },
+        {
+          "name": "Publish - Embed",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/publish/embed", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "publish", "embed"] }
+          }
+        },
+        {
+          "name": "Unpublish - Calculator",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/{{apiV1Prefix}}/calculators/{{calculatorId}}/unpublish", "host": ["{{baseUrl}}"], "path": ["{{apiV1Prefix}}", "calculators", "{{calculatorId}}", "unpublish"] }
           }
         }
       ]
