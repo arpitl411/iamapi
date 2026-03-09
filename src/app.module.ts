@@ -10,6 +10,7 @@ import { CustomConfigModule } from 'utils/db-config/custom-config.module';
 import { CustomConfigService } from 'utils/db-config/custom-config.service';
 import appConfig from 'src/config/config';
 import { UserTagModule } from './modules/user-tag/user-tag.module';
+import { CategoriesModule } from './modules/categories/categories.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { UserTagModule } from './modules/user-tag/user-tag.module';
     RoleModule,
     PermissionModule,
     RolesPermissionModule,
+    CategoriesModule
   ],
 })
 export class AppModule {}

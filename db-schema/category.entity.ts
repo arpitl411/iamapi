@@ -30,13 +30,13 @@ export class Category {
   uuid: string;
 
   @Column({ type: 'integer', nullable: true })
-  lft: number;
+  _lft: number;
 
   @Column({ type: 'integer', nullable: true })
-  rgt: number;
+  _rgt: number;
 
   @Column({ type: 'integer', nullable: true })
-  parent_id: number;
+  parent_id: number | null;
 
   @Column({ type: 'jsonb', nullable: true })
   translations: Record<string, any>;
